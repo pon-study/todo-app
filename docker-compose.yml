@@ -1,0 +1,59 @@
+# 起動するコンテナを列挙するための大枠
+services:
+# アプリに関するコンテナ
+ app:
+  # Dockerファイルを参照してbuild
+  build:
+   context: .
+   dockerfile: docker/php/Dockerfile
+  # コンテナ内に存在するファイルツリーに、srcの内容をマウント
+  # 「:」を記載することで、ホスト側とコンテナ側を区切ることが可能
+  volumes:
+   - ./src:/var/www/html
+  # dbコンテナの起動開始を待つ
+  depends_on:
+   - db:
+      condition: service_healthy # dbコンテナのヘルスチェック成功を確認
+  #  Dockerネットワークの指定。ネットワークをapp,web,dbで共通にしておくことで、内部通信が可能
+  networks:
+   - todo-net
+
+# webサーバーに関するコンテナ
+ web:
+  image: nginx:1.27-alpine
+  ports:
+   - "8080:80"
+  volumes:
+   - ./src:/var/www/html
+   - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+  # appコンテナの起動開始を待つ
+  depends_on:
+   - app
+  networks:
+   - todo-net
+
+# DBに関するコンテナ
+# dbコンテナが確実に起動してからappコンテナを起動するため、ヘルスチェックを記載（5秒待機で1回失敗する。10回失敗で異常と判断）
+ db:
+  image: postgres:16-alpine
+  environment:
+   POSTGRES_DB: todo_app
+   POSTGRES_USER: todo_user
+   POSTGRES_PASSWORD: "DUm'q&"
+  volumes:
+   - db-data:/var/lib/postgresql/data
+  ports:
+   - "5432:5432"
+  networks:
+   - todo-net
+  healthcheck:
+   test: ["CMD-SHELL", "pg_isready -U todo_user -d todo_app"] # dbへテスト接続
+   interval: 5s # 5秒待機
+   timeout: 5s # 5秒経過でタイムアウト
+   retries: 10 # 10回失敗で異常と判断
+
+volumes:
+ db-data:
+
+networks:
+ todo-net:
