@@ -15,7 +15,7 @@ Laravel + Livewire + Tailwind CSS + PostgreSQL で構築した個人学習用の
 ```bash
 git clone https://github.com/pon-study/todo-app.git
 cd todo-app
-docker compose up -d --build
+docker compose up -d --build && docker compose logs -f app
 ```
 
 初回起動時に、コンテナ内でcomposer install・.env作成・APP_KEY生成・マイグレーション・シーディング・フロントエンドのビルドが自動実行されます（数分かかります）。
