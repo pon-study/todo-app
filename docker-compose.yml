@@ -12,7 +12,7 @@ services:
    - ./src:/var/www/html
   # dbコンテナの起動開始を待つ
   depends_on:
-   - db:
+   db:
       condition: service_healthy # dbコンテナのヘルスチェック成功を確認
   #  Dockerネットワークの指定。ネットワークをapp,web,dbで共通にしておくことで、内部通信が可能
   networks:
