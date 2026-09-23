@@ -35,5 +35,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # 9000ポートを使用することを宣言
 EXPOSE 9000
 
+# 事前処理の実行
+ENTRYPOINT [ "entrypoint.sh" ]
+
 # コンテナを起動後、php-fpmを実行
 CMD ["php-fpm"]
